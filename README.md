@@ -2,7 +2,7 @@
 
 ## For United Nations Internation School of Hanoi
 
-The program enables users to book time slots in sports facilities around the school. The program displays the weekly schedule of the desired facility and curates personalized schedules of each user. Users will be able to 
+The program enables users to book time slots in sports facilities around the school. The program displays the weekly schedule of the desired facility and curates personalized schedules for each user. Users will be able to 
 
 - **create** an account,
 - **pick** a free time slot they want to book,
