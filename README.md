@@ -9,4 +9,4 @@ The program enables users to book time slots in sports facilities around the sch
 - **view** their personal and facility schedules,
 - and **remove** any time slots they have already booked.
 
-The program also monitors current AQI and temperature indices to warn administrators of affected bookings; if the temperature and AQI are above 40 and 150 respectively, a list of outside bookings are displayed to the administrator. Additionally, administrators have enhanced capabilities such as the ability to view any user's schedules and remove their bookings.
+The program also monitors current AQI and temperature indices to warn administrators of affected bookings; if the temperature and AQI are above 40 and 150 respectively, a list of outside bookings scheduled for today are displayed to the administrator. Additionally, administrators have enhanced capabilities such as the ability to view any user's schedules and remove their bookings.
