@@ -47,6 +47,7 @@ public class AdminLoginForm extends JFrame implements ActionListener {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setSize(500, 500);
         this.setLayout(null);
+        this.setLocationRelativeTo(null);
         this.setVisible(true);
     }
 
@@ -71,7 +72,6 @@ public class AdminLoginForm extends JFrame implements ActionListener {
                         removeLoginStatus();
                     }
                 }, 2000);
-
             }
         }
         else if(e.getSource() == loginButton && passwordField.getText().isEmpty()){

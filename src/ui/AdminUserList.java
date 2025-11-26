@@ -1,40 +1,56 @@
 package ui;
 
+import db.UserDAO;
+import model.User;
+
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 public class AdminUserList extends JFrame implements ActionListener {
-    private final JButton back;
-    private final String[][] data;
-    private final String [] col;
+
     private final JTable table;
+    private final DefaultTableModel model;
+    private final JButton btnBack;
 
-    public AdminUserList(){
+    public AdminUserList() {
 
-        col = new String[]{"ID", "Username"};
-        data = Main.getUserList();
+        setTitle("All Users");
+        setSize(500,400);
+        setLayout(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        table = new JTable(data, col);
-        table.setBounds(130,10,200,16*data.length);
-        table.setEnabled(false);
+        model = new DefaultTableModel(new Object[]{"User ID","Username"},0){
+            @Override public boolean isCellEditable(int r,int c){return false;}
+        };
 
-        back = new JButton("Back");
-        back.addActionListener(this);
-        back.setFocusable(false);
-        back.setBounds(10,400,100,25);
+        table = new JTable(model);
+        JScrollPane scroll = new JScrollPane(table);
+        scroll.setBounds(20,20,450,280);
+        add(scroll);
 
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setSize(500,500);
-        this.setLayout(null);
-        this.setVisible(true);
-        this.add(back);
-        this.add(table);
+        btnBack = new JButton("Back");
+        btnBack.setBounds(20,320,100,25);
+        btnBack.addActionListener(this);
+        add(btnBack);
 
+        loadUsers();
+
+        setLocationRelativeTo(null);
+        setVisible(true);
     }
+
+    private void loadUsers() {
+        model.setRowCount(0);
+        List<User> users = UserDAO.getAllUsers();
+        for (User u : users) model.addRow(new Object[]{u.getUserId(),u.getUsername()});
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(e.getSource()==back){
+        if (e.getSource()==btnBack) {
             this.dispose();
             new AdminUserSchedule();
         }

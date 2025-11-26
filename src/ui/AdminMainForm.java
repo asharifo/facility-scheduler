@@ -1,80 +1,117 @@
 package ui;
 
+import db.BookingDAO;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
+import java.util.List;
 
-public class AdminMainForm extends FacilitySchedule implements ActionListener {
-    private final JButton delete;
-    private final JButton userSchedule;
-    private final JButton back;
-    private final JLabel warningLabel;
-    private final DefaultTableModel model = new DefaultTableModel();
+public class AdminMainForm extends JFrame implements ActionListener {
+
     private final JTable table;
+    private final DefaultTableModel model;
+    private final JButton btnRefresh;
+    private final JButton btnDelete;
+    private final JButton btnUserSchedules;
+    private final JButton btnBack;
+    private final JLabel lblEnv;
 
-    public AdminMainForm(){
-        super();
-        ArrayList<String> endangeredBookings = Main.getEndangeredBookings();
+    public AdminMainForm() {
+
+        setTitle("Admin Dashboard");
+        setSize(900,500);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(null);
+
+        lblEnv = new JLabel();
+        lblEnv.setBounds(20,20,700,25);
+        add(lblEnv);
+
+        btnRefresh = new JButton("Refresh endangered bookings");
+        btnRefresh.setBounds(20,60,250,30);
+        btnRefresh.addActionListener(this);
+        add(btnRefresh);
+
+        btnDelete = new JButton("Delete Selected");
+        btnDelete.setBounds(280,60,150,30);
+        btnDelete.addActionListener(this);
+        add(btnDelete);
+
+        btnUserSchedules = new JButton("Manage User Schedules");
+        btnUserSchedules.setBounds(450,60,200,30);
+        btnUserSchedules.addActionListener(this);
+        add(btnUserSchedules);
+
+        btnBack = new JButton("Logout");
+        btnBack.setBounds(20,400,100,30);
+        btnBack.addActionListener(this);
+        add(btnBack);
+
+        model = new DefaultTableModel(new Object[]{"ID","User","Facility","Day","Period","Students"},0){
+            @Override
+            public boolean isCellEditable(int r,int c){return false;}
+        };
+
         table = new JTable(model);
-        model.addColumn("Endangered bookings");
-        for (int i = 0; i < endangeredBookings.size(); i ++){
-            model.addRow(new Object[]{endangeredBookings.get(i)});
-        }
+        JScrollPane scroll = new JScrollPane(table);
+        scroll.setBounds(20,110,840,260);
+        add(scroll);
 
-        delete = new JButton("Delete");
-        delete.addActionListener(this);
-        delete.setFocusable(false);
-        delete.setBounds(250,180,100,25);
-        userSchedule = new JButton("View Users' Schedules");
-        userSchedule.addActionListener(this);
-        userSchedule.setFocusable(false);
-        userSchedule.setBounds(10,250,200,25);
-        back = new JButton("Back");
-        back.addActionListener(this);
-        back.setFocusable(false);
-        back.setBounds(10,400,100,25);
-        warningLabel = new JLabel("The current AQI is " + Main.AQI + " and the heat index is " + Main.heatIndex + ". Contact the owners of the following bookings:");
-        warningLabel.setBounds(280,250,900,25);
-        table.setBounds(280,280,300,16*endangeredBookings.size());
-        super.jFrame.add(delete);
-        super.jFrame.add(warningLabel);
-        super.jFrame.add(table);
-        super.jFrame.add(userSchedule);
-        super.table.setEnabled(true);
-        super.table.setDefaultEditor(Object.class,null);
-        super.jFrame.remove(super.back);
-        super.jFrame.revalidate();
-        super.jFrame.add(back);
+        setLocationRelativeTo(null);
+        setVisible(true);
 
+        refreshEnvLabel();
+        loadEndangeredBookings();
     }
+
+    private void refreshEnvLabel() {
+        lblEnv.setText("AQI: " + Main.AQI + "  |  Heat Index: " + Main.heatIndex
+                + "  (Thresholds: AQI ≥ 150 OR Heat ≥ 40°C)");
+    }
+
+    private void loadEndangeredBookings() {
+        model.setRowCount(0);
+
+        if (Main.AQI < 150 && Main.heatIndex < 40) return;
+
+        String today = Main.getCurrentDayOfWeek();
+
+        List<Object[]> rows = BookingDAO.getOutsideBookingsForDay(today);
+        for (Object[] row : rows) model.addRow(row);
+    }
+
     @Override
-    public void actionPerformed(ActionEvent e){
-        super.actionPerformed(e);
-        super.table.setEnabled(true);
-        super.table.setDefaultEditor(Object.class,null);
-        if(e.getSource()==delete){
-            if(super.table.getSelectedRowCount()==1){
-                if(!super.table.getValueAt(super.table.getSelectedRow(),super.table.getSelectedColumn()).equals("x")&&!super.table.getValueAt(super.table.getSelectedRow(),super.table.getSelectedColumn()).equals("Period")&&!super.table.getValueAt(super.table.getSelectedRow(),super.table.getSelectedColumn()).equals("Monday")&&!super.table.getValueAt(super.table.getSelectedRow(),super.table.getSelectedColumn()).equals("Tuesday")&&!super.table.getValueAt(super.table.getSelectedRow(),super.table.getSelectedColumn()).equals("Wednesday")&&!super.table.getValueAt(super.table.getSelectedRow(),super.table.getSelectedColumn()).equals("Thursday")&&!super.table.getValueAt(super.table.getSelectedRow(),super.table.getSelectedColumn()).equals("Friday")&&!super.table.getValueAt(super.table.getSelectedRow(),super.table.getSelectedColumn()).equals("1")&&!super.table.getValueAt(super.table.getSelectedRow(),super.table.getSelectedColumn()).equals("2")&&!super.table.getValueAt(super.table.getSelectedRow(),super.table.getSelectedColumn()).equals("3")&&!super.table.getValueAt(super.table.getSelectedRow(),super.table.getSelectedColumn()).equals("4")&&!super.table.getValueAt(super.table.getSelectedRow(),super.table.getSelectedColumn()).equals("5")){
-                    Main.deleteBooking(super.table.getSelectedRow(),super.table.getSelectedColumn(),super.table.getValueAt(super.table.getSelectedRow(),super.table.getSelectedColumn()).toString());
-                    super.table.setValueAt("x",super.table.getSelectedRow(),super.table.getSelectedColumn());
-                    JOptionPane.showMessageDialog(null,"The booking has been successfully removed",null,JOptionPane.INFORMATION_MESSAGE);
-                }else{
-                    JOptionPane.showMessageDialog(null,"Please select a valid booking",null,JOptionPane.WARNING_MESSAGE);
-                }
-            }
-            else if(super.table.getSelectedRowCount()==0||super.table.getSelectedRowCount()>1){
-                JOptionPane.showMessageDialog(null,"Please select a single booking to delete",null,JOptionPane.WARNING_MESSAGE);
-            }
+    public void actionPerformed(ActionEvent e) {
+
+        if (e.getSource() == btnRefresh) {
+            refreshEnvLabel();
+            loadEndangeredBookings();
         }
-        if(e.getSource()==userSchedule){
+
+        else if (e.getSource() == btnDelete) {
+            int row = table.getSelectedRow();
+            if (row == -1) {
+                JOptionPane.showMessageDialog(this,"Select a booking first");
+                return;
+            }
+
+            int bookingId = (int) model.getValueAt(row, 0);
+            BookingDAO.deleteBookingById(bookingId);
+            model.removeRow(row);
+
+            JOptionPane.showMessageDialog(this,"Booking deleted.");
+        }
+
+        else if (e.getSource() == btnUserSchedules) {
+            this.dispose();
             new AdminUserSchedule();
-            super.jFrame.dispose();
         }
-        if(e.getSource()==back){
-            super.jFrame.dispose();
-            new AdminLoginForm();
+
+        else if (e.getSource() == btnBack) {
+            this.dispose();
+            new UserTypeSelectionForm();
         }
     }
 }

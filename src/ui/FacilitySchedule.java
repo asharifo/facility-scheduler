@@ -1,120 +1,105 @@
 package ui;
 
+import db.BookingDAO;
+import model.Booking;
+import model.Facilities;
+
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
-public class FacilitySchedule implements ActionListener {
-    private final JButton sportsCenter;
-    private final JButton coveredCourts;
-    private final JButton tennisCourt;
-    private final JButton footballField;
-    private final JLabel label;
-    protected JTable table;
-    private final String[] col;
-    private Object[][] data;
-    protected final JButton back;
-    protected final JFrame jFrame;
+public class FacilitySchedule extends JFrame implements ActionListener {
 
-    public FacilitySchedule(){
+    private final JComboBox<Facilities> comboFacility;
+    private final JComboBox<String> comboDay;
+    private final JButton btnDisplay;
+    private final JButton btnBack;
 
-        col = new String[]{"Period","Monday","Tuesday","Wednesday","Thursday","Friday"};
+    private final JTable table;
+    private final DefaultTableModel model;
 
-        jFrame = new JFrame();
-        jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        jFrame.setSize(1000,600);
-        jFrame.setLayout(null);
+    public FacilitySchedule() {
 
-        label = new JLabel("Display Facility Schedules:");
-        label.setBounds(10,10,200,25);
+        setTitle("Facility Schedule");
+        setSize(800,500);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(null);
 
-        sportsCenter = new JButton("Sports Center");
-        sportsCenter.addActionListener(this);
-        sportsCenter.setFocusable(false);
-        sportsCenter.setBounds(10,50,200,25);
+        JLabel lblFac = new JLabel("Facility:");
+        lblFac.setBounds(20,20,80,25);
+        add(lblFac);
 
-        back = new JButton("Back");
-        back.addActionListener(this);
-        back.setFocusable(false);
-        back.setBounds(10,300,100,25);
+        comboFacility = new JComboBox<>();
+        for (Facilities f : Main.FACILITIES) comboFacility.addItem(f);
+        comboFacility.setBounds(100,20,200,25);
+        add(comboFacility);
 
-        coveredCourts = new JButton("Covered Courts");
-        coveredCourts.addActionListener(this);
-        coveredCourts.setFocusable(false);
-        coveredCourts.setBounds(10,100,200,25);
+        JLabel lblDay = new JLabel("Day:");
+        lblDay.setBounds(20,60,80,25);
+        add(lblDay);
 
-        footballField = new JButton("Football Field");
-        footballField.addActionListener(this);
-        footballField.setFocusable(false);
-        footballField.setBounds(10,150,200,25);
+        String[] days = {"Monday","Tuesday","Wednesday","Thursday","Friday"};
+        comboDay = new JComboBox<>(days);
+        comboDay.setBounds(100,60,200,25);
+        add(comboDay);
 
-        tennisCourt = new JButton("Tennis Court");
-        tennisCourt.addActionListener(this);
-        tennisCourt.setFocusable(false);
-        tennisCourt.setBounds(10,200,200,25);
+        btnDisplay = new JButton("Display");
+        btnDisplay.setBounds(20,100,100,25);
+        btnDisplay.addActionListener(this);
+        add(btnDisplay);
 
-        table = new JTable();
+        btnBack = new JButton("Back");
+        btnBack.setBounds(20,400,100,25);
+        btnBack.addActionListener(this);
+        add(btnBack);
 
-        jFrame.add(table);
-        jFrame.add(label);
-        jFrame.add(tennisCourt);
-        jFrame.add(footballField);
-        jFrame.add(coveredCourts);
-        jFrame.add(sportsCenter);
-        jFrame.add(back);
-        jFrame.setVisible(true);
+        model = new DefaultTableModel(new Object[]{"ID","UserID","Day","Period","Students"}, 0){
+            @Override public boolean isCellEditable(int r,int c){return false;}
+        };
+        table = new JTable(model);
+
+        JScrollPane scroll = new JScrollPane(table);
+        scroll.setBounds(350,20,400,350);
+        add(scroll);
+
+        setLocationRelativeTo(null);
+        setVisible(true);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        //if the sports center button was pressed
-        if(e.getSource()==sportsCenter){
-            //remove current table
-            jFrame.remove(table);
-            data = Main.getFacilitySchedule("Sports Center");
-            //create new table with the sport center's schedule
-            table = new JTable(data,col);
-            table.setBounds(250,50,600,100);
-            //remove editing rights
-            table.setEnabled(false);
-            jFrame.add(table);
-            //refresh JFrame
-            jFrame.revalidate();
-        }
-        else if(e.getSource()==coveredCourts){
-            jFrame.remove(table);
-            data = Main.getFacilitySchedule("Covered Courts");
-            table = new JTable(data,col);
-            table.setBounds(250,50,600,100);
-            table.setEnabled(false);
-            jFrame.add(table);
-            jFrame.revalidate();
-        }
-        else if(e.getSource()==tennisCourt){
-            jFrame.remove(table);
-            data = Main.getFacilitySchedule("Tennis Court");
-            table = new JTable(data,col);
-            table.setBounds(250,50,600,100);
-            table.setEnabled(false);
-            jFrame.add(table);
-            jFrame.revalidate();
-        }
-        else if(e.getSource()==footballField){
-            jFrame.remove(table);
-            data = Main.getFacilitySchedule("Football Field");
-            table = new JTable(data,col);
-            table.setBounds(250,50,600,100);
-            table.setEnabled(false);
-            jFrame.add(table);
-            jFrame.revalidate();
 
-        }
-        else if(e.getSource()==back){
-            jFrame.dispose();
-            new UserMainForm();
+        if (e.getSource()==btnDisplay) {
+
+            Facilities facility = (Facilities) comboFacility.getSelectedItem();
+            String day = (String) comboDay.getSelectedItem();
+
+            if (facility == null || day == null) {
+                JOptionPane.showMessageDialog(this,"Select facility and day.");
+                return;
+            }
+
+            model.setRowCount(0);
+
+            List<Booking> list = BookingDAO.getBookingsForFacilityAndDay(facility.getFacilityId(), day);
+
+            for (Booking b : list) {
+                model.addRow(new Object[]{
+                        b.getBookingId(),
+                        b.getUserId(),
+                        b.getDayOfWeek(),
+                        b.getPeriod(),
+                        b.getPersonCount()
+                });
             }
         }
+
+        else if (e.getSource()==btnBack) {
+            this.dispose();
+            if (Main.currentUser != null) new UserMainForm();
+            else new UserTypeSelectionForm();
+        }
     }
-
-
-
+}

@@ -2,39 +2,44 @@ package model;
 
 public class Booking {
 
-    private String facility;
-    private int personCount;
-    private int period;
-    private String date;
-    private String username;
-    
-    public Booking(String facility, int personCount, int period, String date, String username){
-        this.facility = facility;
-        this.personCount = personCount;
+    private final int bookingId;
+    private final int userId;
+    private final int facilityId;
+    private final String dayOfWeek;
+    private final int period;
+    private final int personCount;
+
+    public Booking(int bookingId, int userId, int facilityId,
+                   String dayOfWeek, int period, int personCount) {
+        this.bookingId = bookingId;
+        this.userId = userId;
+        this.facilityId = facilityId;
+        this.dayOfWeek = dayOfWeek;
         this.period = period;
-        this.date = date;
-        this.username = username;
-
+        this.personCount = personCount;
     }
 
-    public String displayBooking(){
-        return facility + " " + personCount + " " +  period + " " +  date;
+    public int getBookingId() {
+        return bookingId;
     }
 
-    public String getFacility() {
-        return facility;
+    public int getUserId() {
+        return userId;
     }
+
+    public int getFacilityId() {
+        return facilityId;
+    }
+
+    public String getDayOfWeek() {
+        return dayOfWeek;
+    }
+
     public int getPeriod() {
         return period;
     }
-    public String getDate() {
-        return date;
-    }
+
     public int getPersonCount() {
         return personCount;
     }
-
-    public String getUsername(){return username;}
-
 }
-

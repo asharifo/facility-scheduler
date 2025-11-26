@@ -1,201 +1,200 @@
 package ui;
 
+import db.BookingDAO;
 import model.Booking;
 import model.Facilities;
 
 import javax.swing.*;
-import java.awt.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-//consider adding a menu bar to be more user-friendly
+import java.util.List;
+
 public class UserMainForm extends JFrame implements ActionListener {
 
-    private final Facilities sportCenter = new Facilities(false, 25);
-    private final Facilities coveredCourts = new Facilities(true, 25);
-    private final Facilities footballField = new Facilities(true, 30);
-    private final Facilities tennisCourt = new Facilities(true, 5);
-
-    private final JLabel labelPersonCount;
-    private final JLabel labelFacility;
-    private final JLabel labelDate;
-    private final JLabel labelPeriod;
-    private final JLabel labelBooking;
-    private final JButton buttonSave;
-    private final JButton facilitySchedule;
-    private final JButton userSchedule;
+    private final JComboBox<Facilities> comboFacility;
+    private final JComboBox<String> comboDay;
+    private final JComboBox<Integer> comboPeriod;
     private final JTextField textPersonCount;
-    private final JComboBox comboBoxFacility;
-    private final JComboBox comboBoxDate;
-    private final JComboBox comboBoxPeriod;
-    private final JButton back;
+    private final JButton btnSave;
+    private final JButton btnLogout;
+    private final JButton btnDelete;
 
+    private final JTable table;
+    private final DefaultTableModel model;
 
     public UserMainForm() {
 
-        Integer[] period = {1, 2, 3, 4, 5};
-        String[] facilities = {"sports center", "covered courts", "football field", "tennis court"};
-        String[] date = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
+        setTitle("Sports Booking - User Dashboard (" + Main.currentUser.getUsername() + ")");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(null);
+        setSize(800,500);
 
-        labelBooking = new JLabel("Create a booking:");
-        labelBooking.setBounds(180, 50, 150, 25);
-        labelBooking.setFont(new Font("Verdana", Font.BOLD, 12));
-        labelPersonCount = new JLabel("How many students?");
-        labelPersonCount.setBounds(50, 100, 150, 25);
-        labelFacility = new JLabel("What facility?");
-        labelFacility.setBounds(50, 150, 150, 25);
-        labelDate = new JLabel("What day?");
-        labelDate.setBounds(50, 200, 150, 25);
-        labelPeriod = new JLabel("What period?");
-        labelPeriod.setBounds(50, 250, 150, 25);
-        buttonSave = new JButton("Save");
-        buttonSave.addActionListener(this);
-        buttonSave.setFocusable(false);
-        buttonSave.setBounds(50, 300, 100, 40);
-        facilitySchedule = new JButton("See facility Schedules");
-        facilitySchedule.addActionListener(this);
-        facilitySchedule.setFocusable(false);
-        facilitySchedule.setBounds(50, 10, 180, 25);
-        userSchedule = new JButton("See your schedule");
-        userSchedule.addActionListener(this);
-        userSchedule.setFocusable(false);
-        userSchedule.setBounds(250, 10, 150, 25);
-        back = new JButton("Back");
-        back.addActionListener(this);
-        back.setFocusable(false);
-        back.setBounds(10, 400, 100, 25);
+        JLabel lblFacility = new JLabel("Facility:");
+        lblFacility.setBounds(30,30,80,25);
+
+        comboFacility = new JComboBox<>();
+        for (Facilities f : Main.FACILITIES) {
+            comboFacility.addItem(f);
+        }
+        comboFacility.setBounds(120,30,200,25);
+
+        JLabel lblDay = new JLabel("Day:");
+        lblDay.setBounds(30,70,80,25);
+
+        String[] days = {"Monday","Tuesday","Wednesday","Thursday","Friday"};
+        comboDay = new JComboBox<>(days);
+        comboDay.setBounds(120,70,200,25);
+
+        JLabel lblPeriod = new JLabel("Period:");
+        lblPeriod.setBounds(30,110,80,25);
+
+        Integer[] periods = {1,2,3,4,5};
+        comboPeriod = new JComboBox<>(periods);
+        comboPeriod.setBounds(120,110,200,25);
+
+        JLabel lblCount = new JLabel("Students:");
+        lblCount.setBounds(30,150,80,25);
 
         textPersonCount = new JTextField();
-        textPersonCount.setBounds(250, 100, 150, 25);
-        comboBoxFacility = new JComboBox(facilities);
-        comboBoxFacility.setBounds(250, 150, 150, 25);
-        comboBoxDate = new JComboBox(date);
-        comboBoxDate.setBounds(250, 200, 150, 25);
-        comboBoxPeriod = new JComboBox(period);
-        comboBoxPeriod.setBounds(250, 250, 150, 25);
+        textPersonCount.setBounds(120,150,200,25);
 
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setSize(500, 500);
-        this.setLayout(null);
-        this.add(labelBooking);
-        this.add(labelPersonCount);
-        this.add(labelFacility);
-        this.add(labelDate);
-        this.add(labelPeriod);
-        this.add(textPersonCount);
-        this.add(comboBoxFacility);
-        this.add(comboBoxDate);
-        this.add(comboBoxPeriod);
-        this.add(buttonSave);
-        this.add(userSchedule);
-        this.add(facilitySchedule);
-        this.add(back);
-        this.setVisible(true);
+        btnSave = new JButton("Create Booking");
+        btnSave.setBounds(30,200,140,30);
+        btnSave.addActionListener(this);
+
+        btnDelete = new JButton("Delete Selected");
+        btnDelete.setBounds(180,200,140,30);
+        btnDelete.addActionListener(this);
+
+        btnLogout = new JButton("Logout");
+        btnLogout.setBounds(30,400,100,30);
+        btnLogout.addActionListener(this);
+
+        // Table of bookings
+        model = new DefaultTableModel(new Object[]{"ID","Facility","Day","Period","Students"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        table = new JTable(model);
+        JScrollPane scroll = new JScrollPane(table);
+        scroll.setBounds(350,30,400,350);
+
+        add(lblFacility);
+        add(comboFacility);
+        add(lblDay);
+        add(comboDay);
+        add(lblPeriod);
+        add(comboPeriod);
+        add(lblCount);
+        add(textPersonCount);
+        add(btnSave);
+        add(btnDelete);
+        add(btnLogout);
+        add(scroll);
+
+        setLocationRelativeTo(null);
+        setVisible(true);
+
+        loadUserBookings();
     }
 
+    private void loadUserBookings() {
+        model.setRowCount(0);
+        List<Booking> bookings = BookingDAO.getBookingsForUser(Main.currentUser.getUserId());
+
+        for (Booking b : bookings) {
+            Facilities f = Main.FACILITIES.stream()
+                    .filter(x -> x.getFacilityId() == b.getFacilityId())
+                    .findFirst()
+                    .orElse(null);
+
+            String facilityName = (f != null) ? f.getName() : ("ID " + b.getFacilityId());
+
+            model.addRow(new Object[]{
+                    b.getBookingId(),
+                    facilityName,
+                    b.getDayOfWeek(),
+                    b.getPeriod(),
+                    b.getPersonCount()
+            });
+        }
+    }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == buttonSave && !textPersonCount.getText().isEmpty()) {
-            if (comboBoxFacility.getSelectedIndex() == 0) {
-                try{
-                if ((Integer.parseInt(textPersonCount.getText())) <= sportCenter.getMaxStudentCapacity()) {
-                    Booking booking;
-                    booking = new Booking(comboBoxFacility.getSelectedItem().toString(), Integer.parseInt(textPersonCount.getText()),
-                            (Integer) comboBoxPeriod.getSelectedItem(), comboBoxDate.getSelectedItem().toString(), Main.currentUser.getUsername());
-                    if (Main.verifyBookingWithUserSchedule(booking) && Main.verifyBookingWithFacilitySchedule(booking)) {
-                        sportCenter.addBookingToSportsCenter(booking);
-                        JOptionPane.showMessageDialog(null, "Booking added successfully", null, JOptionPane.INFORMATION_MESSAGE);
-                    } else if (!Main.verifyBookingWithUserSchedule(booking)) {
-                        JOptionPane.showMessageDialog(null, "You already have a booking at this time", null, JOptionPane.WARNING_MESSAGE);
-                    } else if (!Main.verifyBookingWithFacilitySchedule(booking)) {
-                        JOptionPane.showMessageDialog(null, "The facility is already booked at this time", null, JOptionPane.WARNING_MESSAGE);
-                    }
-                }
-                else {
-                    JOptionPane.showMessageDialog(null, "This facility does not support the specified student count", null, JOptionPane.WARNING_MESSAGE);
-                }
-                }catch(NumberFormatException j){
-                    JOptionPane.showMessageDialog(null, "Please enter an appropriate student count", null, JOptionPane.WARNING_MESSAGE);
-                }
-            } else if (comboBoxFacility.getSelectedIndex() == 1) {
-                try {
-                    if ((Integer.parseInt(textPersonCount.getText())) <= coveredCourts.getMaxStudentCapacity()) {
-                        Booking booking;
-                        booking = new Booking(comboBoxFacility.getSelectedItem().toString(), Integer.parseInt(textPersonCount.getText()),
-                                (Integer) comboBoxPeriod.getSelectedItem(), comboBoxDate.getSelectedItem().toString(), Main.currentUser.getUsername());
-                        if (Main.verifyBookingWithUserSchedule(booking) && Main.verifyBookingWithFacilitySchedule(booking)) {
-                            coveredCourts.addBookingToCoveredCourts(booking);
-                            JOptionPane.showMessageDialog(null, "Booking added successfully", null, JOptionPane.INFORMATION_MESSAGE);
-                        } else if (!Main.verifyBookingWithUserSchedule(booking)) {
-                            JOptionPane.showMessageDialog(null, "You already have a booking at this time", null, JOptionPane.WARNING_MESSAGE);
-                        } else if (!Main.verifyBookingWithFacilitySchedule(booking)) {
-                            JOptionPane.showMessageDialog(null, "The facility is already booked at this time", null, JOptionPane.WARNING_MESSAGE);
-                        }
-                    } else {
-                        JOptionPane.showMessageDialog(null, "This facility does not support the specified student count", null, JOptionPane.WARNING_MESSAGE);
-                    }
-                }catch (NumberFormatException j){
-                    JOptionPane.showMessageDialog(null, "Please enter an appropriate student count", null, JOptionPane.WARNING_MESSAGE);
-                }
-            } else if (comboBoxFacility.getSelectedIndex() == 2) {
-                try {
-                    if ((Integer.parseInt(textPersonCount.getText())) <= footballField.getMaxStudentCapacity()) {
-                        Booking booking;
-                        booking = new Booking(comboBoxFacility.getSelectedItem().toString(), Integer.parseInt(textPersonCount.getText()),
-                                (Integer) comboBoxPeriod.getSelectedItem(), comboBoxDate.getSelectedItem().toString(), Main.currentUser.getUsername());
-                        if (Main.verifyBookingWithUserSchedule(booking) && Main.verifyBookingWithFacilitySchedule(booking)) {
-                            footballField.addBookingToFootballField(booking);
-                            JOptionPane.showMessageDialog(null, "Booking added successfully", null, JOptionPane.INFORMATION_MESSAGE);
-                        } else if (!Main.verifyBookingWithUserSchedule(booking)) {
-                            JOptionPane.showMessageDialog(null, "You already have a booking at this time", null, JOptionPane.WARNING_MESSAGE);
-                        } else if (!Main.verifyBookingWithFacilitySchedule(booking)) {
-                            JOptionPane.showMessageDialog(null, "The facility is already booked at this time", null, JOptionPane.WARNING_MESSAGE);
-                        }
-                    } else {
-                        JOptionPane.showMessageDialog(null, "This facility does not support the specified student count", null, JOptionPane.WARNING_MESSAGE);
-                    }
-                }catch (NumberFormatException j){
-                    JOptionPane.showMessageDialog(null, "Please enter an appropriate student count", null, JOptionPane.WARNING_MESSAGE);
-                }
-            } else if (comboBoxFacility.getSelectedIndex() == 3) {
-                try {
-                    if ((Integer.parseInt(textPersonCount.getText())) <= tennisCourt.getMaxStudentCapacity()) {
-                        Booking booking;
-                        booking = new Booking(comboBoxFacility.getSelectedItem().toString(), Integer.parseInt(textPersonCount.getText()),
-                                (Integer) comboBoxPeriod.getSelectedItem(), comboBoxDate.getSelectedItem().toString(), Main.currentUser.getUsername());
-                        if (Main.verifyBookingWithUserSchedule(booking) && Main.verifyBookingWithFacilitySchedule(booking)) {
-                            tennisCourt.addBookingToTennisCourt(booking);
-                            JOptionPane.showMessageDialog(null, "Booking added successfully", null, JOptionPane.INFORMATION_MESSAGE);
-                        } else if (!Main.verifyBookingWithUserSchedule(booking)) {
-                            JOptionPane.showMessageDialog(null, "You already have a booking at this time", null, JOptionPane.WARNING_MESSAGE);
-                        } else if (!Main.verifyBookingWithFacilitySchedule(booking)) {
-                            JOptionPane.showMessageDialog(null, "The facility is already booked at this time", null, JOptionPane.WARNING_MESSAGE);
-                        }
-                    } else {
-                        JOptionPane.showMessageDialog(null, "This facility does not support the specified student count", null, JOptionPane.WARNING_MESSAGE);
-                    }
-                }catch (NumberFormatException j){
-                    JOptionPane.showMessageDialog(null, "Please enter an appropriate student count", null, JOptionPane.WARNING_MESSAGE);
-                }
-            }
-            } else if (e.getSource() == buttonSave && textPersonCount.getText().isEmpty()) {
-                JOptionPane.showMessageDialog(null, "Please enter the student count", null, JOptionPane.WARNING_MESSAGE);
+
+        if (e.getSource() == btnSave) {
+            String countText = textPersonCount.getText().trim();
+            if (countText.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please enter student count", null, JOptionPane.WARNING_MESSAGE);
+                return;
             }
 
-            if (e.getSource() == facilitySchedule) {
-                this.dispose();
-                new FacilitySchedule();
-            }
-            if (e.getSource() == userSchedule) {
-                this.dispose();
-                new UserSchedule();
-            }
-            if (e.getSource() == back) {
-                this.dispose();
-                new UserLoginForm();
+            int count;
+            try {
+                count = Integer.parseInt(countText);
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Student count must be a number", null, JOptionPane.WARNING_MESSAGE);
+                return;
             }
 
+            Facilities facility = (Facilities) comboFacility.getSelectedItem();
+            if (facility == null) {
+                JOptionPane.showMessageDialog(this, "Please select a facility", null, JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            if (count > facility.getMaxCapacity()) {
+                JOptionPane.showMessageDialog(this, "This facility does not support that many students (max " + facility.getMaxCapacity() + ")", null, JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            String day = (String) comboDay.getSelectedItem();
+            int period = (Integer) comboPeriod.getSelectedItem();
+
+            Booking booking = new Booking(
+                    0,
+                    Main.currentUser.getUserId(),
+                    facility.getFacilityId(),
+                    day,
+                    period,
+                    count
+            );
+
+            int result = BookingDAO.createBooking(booking);
+
+            if (result > 0) {
+                JOptionPane.showMessageDialog(this, "Booking added successfully", null, JOptionPane.INFORMATION_MESSAGE);
+                loadUserBookings();
+            } else if (result == -2) {
+                JOptionPane.showMessageDialog(this, "Conflict: either you already have a booking at this time, or the facility is already booked.", null, JOptionPane.WARNING_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Error creating booking", null, JOptionPane.ERROR_MESSAGE);
+            }
+        }
+
+        else if (e.getSource() == btnDelete) {
+            int row = table.getSelectedRow();
+            if (row == -1) {
+                JOptionPane.showMessageDialog(this, "Please select a booking to delete", null, JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            int bookingId = (int) model.getValueAt(row, 0);
+            int confirm = JOptionPane.showConfirmDialog(this, "Delete selected booking?", "Confirm", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                BookingDAO.deleteBooking(bookingId, Main.currentUser.getUserId());
+                loadUserBookings();
+            }
+        }
+
+        else if (e.getSource() == btnLogout) {
+            Main.currentUser = null;
+            this.dispose();
+            new UserLoginForm();
+        }
     }
-
 }
-
