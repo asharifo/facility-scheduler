@@ -10,10 +10,9 @@ import java.util.List;
 
 public class Main {
 
-    public static User currentUser;              // logged-in user
-    public static List<Facilities> FACILITIES;   // loaded once from DB
+    public static User currentUser;         
+    public static List<Facilities> FACILITIES;  
 
-    // Environmental values (can be set manually or by future API)
     public static int AQI = 0;
     public static double heatIndex = 0.0;
 

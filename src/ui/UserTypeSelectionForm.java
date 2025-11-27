@@ -10,23 +10,23 @@ public class UserTypeSelectionForm extends JFrame implements ActionListener {
     private final JButton userButton;
     private final JButton adminButton;
 
-    public UserTypeSelectionForm(){
+    public UserTypeSelectionForm() {
 
         userButton = new JButton("User");
         userButton.addActionListener(this);
         userButton.setFocusable(false);
         userButton.setFont(new Font("SansSerif", Font.BOLD, 14));
-        userButton.setBounds(125,50,150,50);
+        userButton.setBounds(125, 50, 150, 50);
 
         adminButton = new JButton("Admin");
         adminButton.addActionListener(this);
         adminButton.setFocusable(false);
         adminButton.setFont(new Font("SansSerif", Font.BOLD, 14));
-        adminButton.setBounds(125,150,150,50);
+        adminButton.setBounds(125, 150, 150, 50);
 
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLayout(null);
-        this.setSize(400,300);
+        this.setSize(400, 300);
         this.add(userButton);
         this.add(adminButton);
         this.setLocationRelativeTo(null);
@@ -35,12 +35,12 @@ public class UserTypeSelectionForm extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(e.getSource()==userButton){
+        if (e.getSource() == userButton) {
             this.dispose();
             new UserLoginForm();
-        } else if(e.getSource()==adminButton){
-            // placeholder: you can later create AdminLoginForm that verifies a static password or admin table
-            JOptionPane.showMessageDialog(this, "Admin UI not implemented yet. Focus: user flow & SQL backend.");
+        } else if (e.getSource() == adminButton) {
+            this.dispose();
+            new AdminLoginForm();
         }
     }
 }

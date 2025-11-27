@@ -5,13 +5,13 @@ public class Facilities {
     private final int facilityId;
     private final String name;
     private final boolean outside;
-    private final int maxCapacity;
+    private final int capacity;
 
-    public Facilities(int facilityId, String name, boolean outside, int maxCapacity) {
+    public Facilities(int facilityId, String name, boolean outside, int capacity) {
         this.facilityId = facilityId;
         this.name = name;
         this.outside = outside;
-        this.maxCapacity = maxCapacity;
+        this.capacity = capacity;
     }
 
     public int getFacilityId() {
@@ -26,13 +26,12 @@ public class Facilities {
         return outside;
     }
 
-    public int getMaxCapacity() {
-        return maxCapacity;
+    public int getCapacity() {
+        return capacity;
     }
 
     @Override
     public String toString() {
-        // this is what shows in JComboBox
         return name;
     }
 }

@@ -27,7 +27,7 @@ public class BookingDAO {
             if (rs.next()) return rs.getInt(1);
 
         } catch (SQLIntegrityConstraintViolationException dup) {
-            return -2;  // conflict
+            return -2;  
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -73,9 +73,7 @@ public class BookingDAO {
         }
     }
 
-    // ======================
-    // ADMIN SQL ADDITIONS
-    // ======================
+    // ADMIN SQL METHODS
 
     public static void deleteBookingById(int bookingId) {
         String sql = "DELETE FROM bookings WHERE booking_id = ?";
@@ -147,7 +145,6 @@ public class BookingDAO {
         return list;
     }
 
-    // helper
     private static Booking map(ResultSet rs) throws Exception {
         return new Booking(
                 rs.getInt("booking_id"),

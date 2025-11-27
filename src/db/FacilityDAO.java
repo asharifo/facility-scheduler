@@ -11,7 +11,7 @@ public class FacilityDAO {
     public static List<Facilities> loadAllFacilities() {
         List<Facilities> list = new ArrayList<>();
 
-        String sql = "SELECT facility_id, name, is_outside, max_capacity FROM facilities ORDER BY facility_id";
+        String sql = "SELECT facility_id, name, capacity, is_outside FROM facilities ORDER BY facility_id";
 
         try (Connection conn = Database.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -22,7 +22,7 @@ public class FacilityDAO {
                         rs.getInt("facility_id"),
                         rs.getString("name"),
                         rs.getBoolean("is_outside"),
-                        rs.getInt("max_capacity")
+                        rs.getInt("capacity")
                 ));
             }
 
